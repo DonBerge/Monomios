@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module Monomio
 (
     Monomio,
@@ -13,7 +15,7 @@ crearM = M
 obtenerExp (M _ b) = b
 obtenerCoef (M a _) = a
 
-evalM (M a b) x = a*(x^b)
+evalM x (M a b) = a* (x^^b)
 
 _shownum x | x<0 = "("++show x++")"
            | otherwise = show x
