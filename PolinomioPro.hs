@@ -3,7 +3,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 
 import Data.List
-import Monomio
+import MonomioPro
 import RBT
 
 class Polinomio t a b where

@@ -1,40 +1,51 @@
-import System.IO
+module Polinomio where
+
 import Data.List
 import Monomio
 
-data Polinomio a b = N | P (Monomio a b) (Polinomio a b)
+type Polinomio = [Monomio]
 
-nulo = N
+nulo :: Polinomio
+nulo = []
 
-_maximoMonomio N = crearM 0 0
-_maximoMonomio (P x xs) | obtenerExp x < obtenerExp m = x
-                      | otherwise = m 
-                          where m = _maximoMonomio xs
+grado::Polinomio->Int
+grado = obtenerExp . maximum
 
-grado = obtenerExp . _maximoMonomio
+coeficientePrincipal::Polinomio->Float
+coeficientePrincipal [] = 0.0
+coeficientePrincipal xs = (obtenerCoef . maximum) xs
 
-coeficientePrincipal = obtenerCoef . _maximoMonomio
+evalP :: Float -> Polinomio -> Float
+evalP x = sum . map (evalM x)
 
-evalP N _ = 0
-evalP (P x xs) val = evalM x val + evalP xs val
+sumarMonomio :: Monomio -> Polinomio -> Polinomio
+sumarMonomio m xs | obtenerCoef m == 0 = xs
+                  | otherwise = sumarMonomio' m xs
+                  where
+                      sumarMonomio' m [] = [m]
+                      sumarMonomio' m (x:xs) | obtenerCoef m == obtenerCoef x = crearM (obtenerCoef m + obtenerCoef x) (obtenerExp x) : xs
+                                             | otherwise = x : sumarMonomio' m xs
 
+toStr :: Polinomio -> String 
+toStr xs | null xs = "0"
+         | otherwise = concat (mergeList (map show orderedPolinomio) listaDeMases)
+                   where
+                       orderedPolinomio = (reverse . sort) xs
+                       listaDeMases = replicate (length orderedPolinomio-1) "+"
+                       mergeList [] ys = ys
+                       mergeList (x:xs) ys = x:mergeList ys xs
 
+fromPairList :: [(Float, Int)] -> Polinomio
+fromPairList = map (uncurry crearM)
 
-sumarMonomio m p | obtenerCoef m == 0 = p
-                 | otherwise = sumarMonomio' m p
-                 where 
-                    sumarMonomio' m N = P m N
-                    sumarMonomio' m (P x xs) | obtenerExp x == obtenerExp m = P (crearM (obtenerCoef x + obtenerCoef m) (obtenerExp x)) xs
-                                            | otherwise = P x (sumarMonomio' m xs)
+printPolinomio :: Polinomio -> IO ()
+printPolinomio = print . toStr
 
-fromTupleList [] = N
-fromTupleList ((a,b):xs) = sumarMonomio (crearM a b) (fromTupleList xs)
+split :: Char -> String -> [String]
+split p s =  case dropWhile (==p) s of
+                      "" -> []
+                      s' -> w : split p s''
+                            where (w, s'') = break (==p) s'
 
-p = fromTupleList [(1,2),(2,1),(1,0)]
-
-instance (Show a,Show b,Ord a,Ord b,Num a,Num b) => Show (Polinomio a b) where
-    show N = ""
-    show (P x N) = show x
-    show (P x xs) = show x ++ "+" ++ show xs 
-
-main = do print p
+readPolinomio :: String -> Polinomio
+readPolinomio = map read . split '+'

@@ -1,3 +1,2 @@
-import Monomio
+import Polinomio
 
-main = do print 2
