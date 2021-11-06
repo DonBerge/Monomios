@@ -1,3 +1,4 @@
+import Polinomio
 import Data.Char
 
 printMenu = do
@@ -29,4 +30,3 @@ main = do
 				main
 			else
 				return ()
-			
