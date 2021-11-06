@@ -39,7 +39,7 @@ fromPairList :: [(Float, Int)] -> Polinomio
 fromPairList = map (uncurry crearM)
 
 printPolinomio :: Polinomio -> IO ()
-printPolinomio = print . toStr
+printPolinomio = putStr . toStr
 
 split :: Char -> String -> [String]
 split p s =  case dropWhile (==p) s of
@@ -49,3 +49,5 @@ split p s =  case dropWhile (==p) s of
 
 readPolinomio :: String -> Polinomio
 readPolinomio = map read . split '+'
+
+main = do printPolinomio $ readPolinomio "2*x^2+3*x^3+4*x^4"
