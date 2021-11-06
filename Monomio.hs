@@ -43,7 +43,14 @@ instance Show Monomio where
 
 instance Read Monomio where
     readsPrec _ xs = let
-                            coeficiente = read(takeWhile (/= '*') xs) :: Float
-                            exponente = read(tail $ dropWhile (/= '^') xs) :: Int
+                            coeficiente::Float
+                            coeficiente | notElem 'x' xs = read xs
+                                        | head xs == 'x' = 1.0
+                                        | otherwise = read (takeWhile (/= '*') xs)
+                                        
+                            exponente::Int
+                            exponente | notElem 'x' xs = 0
+                                      | last xs == 'x' = 1
+                                      | otherwise = read (tail $ dropWhile (/= '^') xs)
                      in
                             [(crearM coeficiente exponente,"")]

@@ -9,11 +9,12 @@ nulo :: Polinomio
 nulo = []
 
 grado::Polinomio->Int
-grado = obtenerExp . maximum
+grado p | p == nulo = -1
+        | otherwise = (obtenerExp . maximum) p
 
 coeficientePrincipal::Polinomio->Float
-coeficientePrincipal [] = 0.0
-coeficientePrincipal xs = (obtenerCoef . maximum) xs
+coeficientePrincipal p | p == nulo = 0.0
+                       | otherwise = (obtenerCoef . maximum) p
 
 evalP :: Float -> Polinomio -> Float
 evalP x = sum . map (evalM x)
@@ -23,15 +24,19 @@ sumarMonomio m xs | obtenerCoef m == 0 = xs
                   | otherwise = sumarMonomio' m xs
                   where
                       sumarMonomio' m [] = [m]
-                      sumarMonomio' m (x:xs) | obtenerCoef m == obtenerCoef x = crearM (obtenerCoef m + obtenerCoef x) (obtenerExp x) : xs
+                      sumarMonomio' m (x:xs) | obtenerExp m == obtenerExp x = let 
+                                                                                nuevoCoeficiente = obtenerCoef m + obtenerCoef x   
+                                                                              in
+                                                                                if nuevoCoeficiente == 0.0 then xs else crearM nuevoCoeficiente (obtenerExp x) : xs
                                              | otherwise = x : sumarMonomio' m xs
 
 toStr :: Polinomio -> String 
-toStr xs | null xs = "0"
-         | otherwise = concat (mergeList (map show orderedPolinomio) listaDeMases)
+toStr p | p == nulo = "0"
+        | otherwise = concat (mergeList (map show orderedPolinomio) listaDeMases)
                    where
-                       orderedPolinomio = (reverse . sort) xs
+                       orderedPolinomio = (reverse . sort) p
                        listaDeMases = replicate (length orderedPolinomio-1) "+"
+                       mergeList::[a]->[a]->[a]
                        mergeList [] ys = ys
                        mergeList (x:xs) ys = x:mergeList ys xs
 
@@ -39,7 +44,8 @@ fromPairList :: [(Float, Int)] -> Polinomio
 fromPairList = map (uncurry crearM)
 
 printPolinomio :: Polinomio -> IO ()
-printPolinomio = putStr . toStr
+printPolinomio p | p == nulo = putStr "Polinomio nulo"
+                 | otherwise = (putStr . toStr) p
 
 split :: Char -> String -> [String]
 split p s =  case dropWhile (==p) s of
@@ -49,5 +55,3 @@ split p s =  case dropWhile (==p) s of
 
 readPolinomio :: String -> Polinomio
 readPolinomio = map read . split '+'
-
-main = do printPolinomio $ readPolinomio "2*x^2+3*x^3+4*x^4"
